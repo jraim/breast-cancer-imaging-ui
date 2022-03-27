@@ -1,0 +1,89 @@
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
+    .header-height {
+        height: 100px;
+    }
+
+    #root {
+        max-width: 100vw;
+    }
+
+    h1 {
+        font-size: 26px;
+        line-height: 32px;
+    }
+
+    h2 {
+        font-size: 23px;
+        line-height: 28px;
+    }
+
+    h3 {
+        font-size: 20px;
+        line-height: 25px;
+    }
+
+    h4 {
+        font-size: 18px;
+        line-height: 22px;
+    }
+
+    h5 {
+        font-size: 16px;
+        line-height: 20px;
+    }
+
+    h6 {
+        font-size: 15px;
+        line-height: 20px;
+    }
+
+    .cui.c-md-1 {
+        grid-column: span 1;
+    }
+    .cui.c-md-2 {
+        grid-column: span 2;
+    }
+    .cui.c-md-3 {
+        grid-column: span 3;
+    }
+    .cui.c-md-4 {
+        grid-column: span 4;
+    }
+    .cui.c-md-5 {
+        grid-column: span 5;
+    }
+    .cui.c-md-6 {
+        grid-column: span 6;
+    }
+    .cui.c-md-7 {
+        grid-column: span 7;
+    }
+    .cui.c-md-8 {
+        grid-column: span 8;
+    }
+    .cui.c-md-9 {
+        grid-column: span 9;
+    }
+    .cui.c-md-10 {
+        grid-column: span 10;
+    }
+    .cui.c-md-11 {
+        grid-column: span 11;
+    }
+    .cui.c-md-12 {
+        grid-column: span 12;
+    }
+    .cui.c-md-13 {
+        grid-column: span 13;
+    }
+    .cui.c-md-14 {
+        grid-column: span 14;
+    }
+    .cui.c-md-15 {
+        grid-column: span 15;
+    }
+    .cui.c-md-16 {
+        grid-column: span 16;
+    }
+}
