@@ -1,4 +1,6 @@
 import React, { Component } from 'react';
+import Loader from '../../components/Loader';
+import datasetApi from '../../apis/dataset-api';
 import ToolBox from './toolbox';
 
 const styles = {
@@ -6,11 +8,10 @@ const styles = {
         margin: '20px 0 0 0',
         width: '600px',
         height: '70vh',
-        // border: '1px solid',
     },
     imageBox: {
         objectFit: 'contain',
-        backgroundColor: 'lightgrey',
+        backgroundColor: 'white',
         width: '600px',
         height: '400px',
         border: '3px black solid',
@@ -23,9 +24,24 @@ export default class DicomStage extends Component {
         super(props);
 
         this.state = {
-            curSlice: 1,
-            totalNumSlices: 10,
+            curSlice: null,
+            curSliceUrl: null,
+            totalNumSlices: null,
+            slices: null,
         };
+    }
+
+    componentDidMount() {
+        const getDataset = async () => {
+            const dataset = await datasetApi.get();
+            this.setState({
+                curSlice: 1,
+                totalNumSlices: dataset.length,
+                slices: dataset,
+                curSliceUrl: dataset[0].url,
+            });
+        };
+        getDataset();
     }
 
     actions = {
@@ -37,12 +53,17 @@ export default class DicomStage extends Component {
         },
         prevSlice: () => {
             if (this.state.curSlice <= 1) return;
-            this.setState({ curSlice: this.state.curSlice - 1 });
-            console.log('previous slice');
+            const newSliceNum = this.state.curSlice - 1;
+            const newSliceUrl = this.state.slices[newSliceNum - 1].url;
+            this.setState({ curSlice: newSliceNum, curSliceUrl: newSliceUrl });
+            this.setState({});
         },
         nextSlice: () => {
             if (this.state.curSlice >= this.state.totalNumSlices) return;
-            this.setState({ curSlice: this.state.curSlice + 1 });
+            const newSliceNum = this.state.curSlice + 1;
+            const newSliceUrl = this.state.slices[newSliceNum - 1].url;
+            this.setState({ curSlice: newSliceNum, curSliceUrl: newSliceUrl });
+            this.setState({});
         },
     };
 
@@ -51,7 +72,9 @@ export default class DicomStage extends Component {
             <div className='cui flex column ai-center'>
                 <div className='cui flex column ai-center jc-center' style={styles.stage}>
                     <ToolBox actions={this.actions} sliceNum={this.state.curSlice} />
-                    <div style={styles.imageBox}></div>
+                    <div className='cui flex row ai-center jc-center' style={styles.imageBox}>
+                        {!this.state.curSlice ? <Loader /> : <img src={this.state.curSliceUrl} />}
+                    </div>
                 </div>
             </div>
         );

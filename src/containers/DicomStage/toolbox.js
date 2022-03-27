@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { Button, Icon } from 'semantic-ui-react';
+import { Button } from 'semantic-ui-react';
 
 const styles = {
     toolBox: {
@@ -27,7 +27,7 @@ export default class ToolBox extends Component {
                             <Button icon='zoom-out' onClick={this.props.actions.zoomOut} />
                         </Button.Group>
                     </div>
-                    <span>Slice: {this.props.sliceNum}</span>
+                    {this.props.sliceNum ? <span>Slice: {this.props.sliceNum}</span> : ''}
                     <div className='cui flex column ai-start'>
                         <Button.Group>
                             <Button icon='caret square left outline' onClick={this.props.actions.prevSlice} />
