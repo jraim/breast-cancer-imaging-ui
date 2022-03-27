@@ -1,7 +1,18 @@
 import React, { Component } from 'react';
 import Loader from '../../components/Loader';
+import URLImage from './URLImage';
+import { Stage, Layer } from 'react-konva';
 import datasetApi from '../../apis/dataset-api';
-import ToolBox from './toolbox';
+import ToolBox from './ToolBox';
+import MyEllipse from './MyEllipse';
+
+const ellipseInitialProps = {
+    x: 50,
+    y: 50,
+    height: 80,
+    width: 50,
+    rotation: 45,
+};
 
 const styles = {
     stage: {
@@ -10,16 +21,14 @@ const styles = {
         height: '70vh',
     },
     imageBox: {
-        objectFit: 'contain',
+        objectFit: 'fill',
         backgroundColor: 'white',
         width: '600px',
         height: '400px',
-        border: '3px black solid',
-        borderRadius: '0 0 7px 7px',
     },
 };
 
-export default class DicomStage extends Component {
+export default class DicomStudio extends Component {
     constructor(props) {
         super(props);
 
@@ -28,23 +37,23 @@ export default class DicomStage extends Component {
             curSliceUrl: null,
             totalNumSlices: null,
             slices: null,
+            currentShape: ellipseInitialProps,
         };
     }
 
     componentDidMount() {
-        const getDataset = async () => {
-            const dataset = await datasetApi.get();
+        datasetApi.get().then((dataset) =>
             this.setState({
                 curSlice: 1,
                 totalNumSlices: dataset.length,
                 slices: dataset,
                 curSliceUrl: dataset[0].url,
-            });
-        };
-        getDataset();
+                selectionStarted: false,
+            })
+        );
     }
 
-    actions = {
+    toolBoxActions = {
         zoomIn: () => {
             console.log('zoom-in');
         },
@@ -56,14 +65,25 @@ export default class DicomStage extends Component {
             const newSliceNum = this.state.curSlice - 1;
             const newSliceUrl = this.state.slices[newSliceNum - 1].url;
             this.setState({ curSlice: newSliceNum, curSliceUrl: newSliceUrl });
-            this.setState({});
         },
         nextSlice: () => {
             if (this.state.curSlice >= this.state.totalNumSlices) return;
             const newSliceNum = this.state.curSlice + 1;
             const newSliceUrl = this.state.slices[newSliceNum - 1].url;
             this.setState({ curSlice: newSliceNum, curSliceUrl: newSliceUrl });
-            this.setState({});
+        },
+        restartSelection: () => {
+            this.setState({ selectionStarted: false });
+        },
+        submitSelection: () => {
+            console.log(this.state.currentShape);
+        },
+    };
+
+    actions = {
+        onShapeDragStart: ({ evt, shape }) => {},
+        onShapeDragEnd: ({ evt, shape }) => {
+            this.setState({ currentShape: shape });
         },
     };
 
@@ -71,9 +91,22 @@ export default class DicomStage extends Component {
         return (
             <div className='cui flex column ai-center'>
                 <div className='cui flex column ai-center jc-center' style={styles.stage}>
-                    <ToolBox actions={this.actions} sliceNum={this.state.curSlice} />
+                    <ToolBox actions={this.toolBoxActions} sliceNum={this.state.curSlice} selectionStarted={this.state.selectionStarted} />
                     <div className='cui flex row ai-center jc-center' style={styles.imageBox}>
-                        {!this.state.curSlice ? <Loader /> : <img src={this.state.curSliceUrl} />}
+                        {!this.state.curSlice ? (
+                            <Loader />
+                        ) : (
+                            <Stage width={600} height={400}>
+                                <Layer>
+                                    <URLImage src={this.state.curSliceUrl} />
+                                    {/* <MyEllipse
+                                        shape={ellipseInitialProps}
+                                        onDragStart={this.actions.onShapeDragStart}
+                                        onDragEnd={this.actions.onShapeDragEnd}
+                                    /> */}
+                                </Layer>
+                            </Stage>
+                        )}
                     </div>
                 </div>
             </div>

@@ -5,7 +5,7 @@
 // });
 
 const datasetApi = {
-    get: () => {
+    get: async () => {
         return [
             {
                 id: 1,
