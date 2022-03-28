@@ -1,6 +1,8 @@
 import React, { Component } from 'react';
 import { Button } from 'semantic-ui-react';
 
+// const DropdownExampleSearchSelectionTwo = () => <Dropdown placeholder='State' search selection options={stateOptions} />;
+
 const styles = {
     toolBox: {
         backgroundColor: '#323232',
@@ -13,6 +15,9 @@ const styles = {
         width: '50px',
         height: '50px',
         cursor: 'pointer',
+    },
+    dropdown: {
+        width: '20px',
     },
 };
 

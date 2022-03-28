@@ -1,54 +1,87 @@
-import React, { Component } from 'react';
-import { Ellipse } from 'react-konva';
+import React, { useState } from 'react';
+import { Transformer, Ellipse } from 'react-konva';
 
-const callFunction = (fn, data) => {
-    if (typeof fn === 'function') fn(data);
-};
+export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSelect, callbackAttributes }) {
+    const [isDragging, setDraggingFlag] = useState(false);
+    const [rectangle, setEllipse] = useState(shapeProps);
+    const shapeRef = React.useRef();
+    const trRef = React.useRef();
 
-export default class MyEllipse extends Component {
-    constructor(props) {
-        super(props);
+    React.useEffect(() => {
+        if (isSelected) {
+            // we need to attach transformer manually
+            trRef.current.nodes([shapeRef.current]);
+            trRef.current.getLayer().batchDraw();
+        }
+    }, [isSelected]);
 
-        this.state = {
-            isDragging: false,
-            x: this.props.shape.x,
-            y: this.props.shape.y,
-            height: this.props.shape.height,
-            width: this.props.shape.width,
-            rotation: this.props.shape.rotation,
-        };
-    }
+    const onAttributesChange = (newAttrs) => {
+        setEllipse(newAttrs);
+        callbackAttributes(newAttrs);
+    };
 
-    evtHandlers = {
-        onClick: (evt) => {
-            callFunction(this.props.onClick, { evt, shape: this.state });
-        },
+    const eventHandlers = {
         onDragStart: (evt) => {
-            this.setState({ isDragging: true });
-            callFunction(this.props.onDragStart, { evt, shape: this.state });
+            setDraggingFlag(true);
         },
-        onDragEnd: (evt) => {
-            this.setState({ isDragging: false, x: evt.target.x(), y: evt.target.y() });
-            callFunction(this.props.onDragEnd, { evt, shape: this.state });
+        onDragEnd: (e) => {
+            setDraggingFlag(false);
+            onAttributesChange({
+                ...rectangle,
+                x: e.target.x(),
+                y: e.target.y(),
+            });
+        },
+        onTransformEnd: (e) => {
+            // transformer is changing scale of the node
+            // and NOT its width or height
+            // but in the store we have only width and height
+            // to match the data better we will reset scale on transform end
+            const node = shapeRef.current;
+            const scaleX = node.scaleX();
+            const scaleY = node.scaleY();
+
+            // we will reset it back
+            node.scaleX(1);
+            node.scaleY(1);
+            onAttributesChange({
+                ...rectangle,
+                x: node.x(),
+                y: node.y(),
+                // set minimal value
+                width: Math.max(10, node.width() * scaleX),
+                height: Math.max(10, node.height() * scaleY),
+            });
         },
     };
 
-    render() {
-        return (
+    return (
+        <React.Fragment>
             <Ellipse
+                onClick={onSelect}
+                onTap={onSelect}
+                ref={shapeRef}
+                {...rectangle}
+                opacity={isDragging ? dynamicProps.opacity.drag : dynamicProps.opacity.still}
+                fill={isDragging ? dynamicProps.fill.drag : dynamicProps.fill.still}
                 draggable
-                x={this.state.x}
-                y={this.state.y}
-                height={this.state.height}
-                width={this.state.width}
-                rotation={this.state.rotation}
-                opacity={this.state.isDragging ? 0.2 : 0.5}
-                stroke='black'
-                fill={this.state.isDragging ? 'white' : 'red'}
-                onClick={this.evtHandlers.onClick}
-                onDragStart={this.evtHandlers.onDragStart}
-                onDragEnd={this.evtHandlers.onDragEnd}
+                stroke={'black'}
+                onDragStart={eventHandlers.onDragStart}
+                onDragEnd={eventHandlers.onDragEnd}
+                onTransformEnd={eventHandlers.onTransformEnd}
             />
-        );
-    }
+            {isSelected ? (
+                <Transformer
+                    ref={trRef}
+                    boundBoxFunc={(oldBox, newBox) => {
+                        // limit resize
+                        if (newBox.width < 10 || newBox.height < 10) {
+                            return oldBox;
+                        }
+                        return newBox;
+                    }}
+                />
+            ) : null}
+        </React.Fragment>
+    );
 }

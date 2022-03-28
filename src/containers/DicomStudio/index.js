@@ -1,23 +1,34 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Loader from '../../components/Loader';
-import URLImage from './URLImage';
 import { Stage, Layer } from 'react-konva';
+
+// API calls
 import datasetApi from '../../apis/dataset-api';
+
+// My components
+import URLImage from './URLImage';
 import ToolBox from './ToolBox';
 import MyEllipse from './MyEllipse';
 
-const ellipseInitialProps = {
-    x: 50,
-    y: 50,
-    height: 80,
-    width: 50,
-    rotation: 45,
+// Initial values
+const stageSize = { width: 600, height: 400 };
+const initEllipse = {
+    x: 100,
+    y: 100,
+    width: 100,
+    height: 100,
+    rotation: 0,
+    id: 'e1',
+};
+const ellipseDynamicProps = {
+    fill: { still: 'red', drag: 'white' },
+    opacity: { still: 0.5, drag: 0.2 },
 };
 
 const styles = {
     stage: {
         margin: '20px 0 0 0',
-        width: '600px',
+        width: `${stageSize.width}px`,
         height: '70vh',
     },
     imageBox: {
@@ -28,32 +39,38 @@ const styles = {
     },
 };
 
-export default class DicomStudio extends Component {
-    constructor(props) {
-        super(props);
+/**
+ * Function to determine wether a shape has been dragged out of stage
+ * @param {object} shape
+ * @returns
+ */
+const shapeWentOutOfStage = (shape) => {
+    return shape.x < 0 || shape.y < 0 || shape.x > stageSize.width || shape.y > stageSize.height;
+};
 
-        this.state = {
-            curSlice: null,
-            curSliceUrl: null,
-            totalNumSlices: null,
-            slices: null,
-            currentShape: ellipseInitialProps,
-        };
-    }
+export default function DicomStudio() {
+    const [curSlice, setCurSlice] = useState(null);
+    const [slices, setSlices] = useState([]);
+    const [selectedId, selectShape] = useState(null);
+    const [ellipse, setEllipse] = useState(initEllipse);
 
-    componentDidMount() {
-        datasetApi.get().then((dataset) =>
-            this.setState({
-                curSlice: 1,
-                totalNumSlices: dataset.length,
-                slices: dataset,
-                curSliceUrl: dataset[0].url,
-                selectionStarted: false,
-            })
-        );
-    }
+    const imageRef = useRef(null);
 
-    toolBoxActions = {
+    useEffect(() => {
+        datasetApi.get().then((dataset) => {
+            setCurSlice(1);
+            setSlices(dataset);
+        });
+    }, []);
+
+    const checkDeselect = (e) => {
+        const clickedOnEmpty = e.target._id === imageRef.current.imageNode._id;
+        if (clickedOnEmpty) {
+            selectShape(null);
+        }
+    };
+
+    const toolBoxActions = {
         zoomIn: () => {
             console.log('zoom-in');
         },
@@ -61,55 +78,51 @@ export default class DicomStudio extends Component {
             console.log('zoom-out');
         },
         prevSlice: () => {
-            if (this.state.curSlice <= 1) return;
-            const newSliceNum = this.state.curSlice - 1;
-            const newSliceUrl = this.state.slices[newSliceNum - 1].url;
-            this.setState({ curSlice: newSliceNum, curSliceUrl: newSliceUrl });
+            if (curSlice <= 1) return;
+            setCurSlice(curSlice - 1);
         },
         nextSlice: () => {
-            if (this.state.curSlice >= this.state.totalNumSlices) return;
-            const newSliceNum = this.state.curSlice + 1;
-            const newSliceUrl = this.state.slices[newSliceNum - 1].url;
-            this.setState({ curSlice: newSliceNum, curSliceUrl: newSliceUrl });
-        },
-        restartSelection: () => {
-            this.setState({ selectionStarted: false });
+            if (curSlice >= slices.length) return;
+            setCurSlice(curSlice + 1);
         },
         submitSelection: () => {
-            console.log(this.state.currentShape);
+            const { x, y, width, height, rotation } = ellipse;
+            console.log({ x, y, width, height, rotation });
         },
     };
 
-    actions = {
-        onShapeDragStart: ({ evt, shape }) => {},
-        onShapeDragEnd: ({ evt, shape }) => {
-            this.setState({ currentShape: shape });
+    const ellipseActions = {
+        onSelect: () => {
+            selectShape(initEllipse.id);
+        },
+        onChange: (ellipse) => {
+            setEllipse(ellipse);
         },
     };
 
-    render() {
-        return (
-            <div className='cui flex column ai-center'>
-                <div className='cui flex column ai-center jc-center' style={styles.stage}>
-                    <ToolBox actions={this.toolBoxActions} sliceNum={this.state.curSlice} selectionStarted={this.state.selectionStarted} />
-                    <div className='cui flex row ai-center jc-center' style={styles.imageBox}>
-                        {!this.state.curSlice ? (
-                            <Loader />
-                        ) : (
-                            <Stage width={600} height={400}>
-                                <Layer>
-                                    <URLImage src={this.state.curSliceUrl} />
-                                    {/* <MyEllipse
-                                        shape={ellipseInitialProps}
-                                        onDragStart={this.actions.onShapeDragStart}
-                                        onDragEnd={this.actions.onShapeDragEnd}
-                                    /> */}
-                                </Layer>
-                            </Stage>
-                        )}
-                    </div>
+    return (
+        <div className='cui flex column ai-center'>
+            <div className='cui flex column ai-center jc-center' style={styles.stage}>
+                <ToolBox actions={toolBoxActions} sliceNum={curSlice} />
+                <div className='cui flex row ai-center jc-center' style={styles.imageBox}>
+                    {!curSlice || !slices || slices.length < 1 ? (
+                        <Loader />
+                    ) : (
+                        <Stage width={stageSize.width} height={stageSize.height} onMouseDown={checkDeselect} onTouchStart={checkDeselect}>
+                            <Layer>
+                                <URLImage ref={imageRef} src={slices[curSlice - 1].url} />
+                                <MyEllipse
+                                    shapeProps={initEllipse}
+                                    dynamicProps={ellipseDynamicProps}
+                                    isSelected={initEllipse.id === selectedId}
+                                    onSelect={ellipseActions.onSelect}
+                                    callbackAttributes={ellipseActions.onChange}
+                                />
+                            </Layer>
+                        </Stage>
+                    )}
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
 }

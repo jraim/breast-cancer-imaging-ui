@@ -40,6 +40,8 @@ export default class URLImage extends Component {
                 onClick={this.props.onClick}
                 x={this.props.x}
                 y={this.props.y}
+                scaleX={1}
+                scaleY={1}
                 image={this.state.image}
                 ref={(node) => {
                     this.imageNode = node;
