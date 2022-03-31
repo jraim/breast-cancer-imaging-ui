@@ -1,7 +1,5 @@
-import React, { Component } from 'react';
-import { Button } from 'semantic-ui-react';
-
-// const DropdownExampleSearchSelectionTwo = () => <Dropdown placeholder='State' search selection options={stateOptions} />;
+import React from 'react';
+import { Button, Dropdown, Label } from 'semantic-ui-react';
 
 const styles = {
     toolBox: {
@@ -19,31 +17,38 @@ const styles = {
     dropdown: {
         width: '20px',
     },
+    sliceLabel: {
+        width: '70px',
+    },
 };
 
-export default class ToolBox extends Component {
-    render() {
+export default function ToolBox({ actions, caseCodeList, sliceNum }) {
+    const CasesDropdown = () => {
+        const options = caseCodeList.map((c, i) => ({ key: i, text: c.split('/')[0], value: c }));
         return (
-            <div className='cui flex row jc-space-between' style={styles.toolBox}>
-                <div className='cui flex row jc-space-between width-100'>
-                    <div className='cui flex column ai-start width-30'>
-                        <Button.Group>
-                            <Button icon='zoom-in' onClick={this.props.actions.zoomIn} title='Zoom in' />
-                            <Button icon='zoom-out' onClick={this.props.actions.zoomOut} title='Zoom out' />
-                            <Button onClick={this.props.actions.submitSelection} title='Submit selection'>
-                                Submit
-                            </Button>
-                        </Button.Group>
-                    </div>
-                    <div className='cui width-40'>{this.props.sliceNum ? <span>Slice: {this.props.sliceNum}</span> : ''}</div>
-                    <div className='cui flex column ai-end width-30'>
-                        <Button.Group>
-                            <Button icon='caret square left outline' onClick={this.props.actions.prevSlice} title='Previous slice' />
-                            <Button icon='caret square right outline' onClick={this.props.actions.nextSlice} title='Next slice' />
-                        </Button.Group>
-                    </div>
+            <Dropdown title='Select a case' placeholder='Select a case code' search selection options={options} onChange={actions.onDropDownChange} />
+        );
+    };
+
+    return (
+        <div className='cui flex row jc-space-between' style={styles.toolBox}>
+            <div className='cui flex row jc-space-between width-100'>
+                <div className='cui flex row ac-start'>
+                    <CasesDropdown />
+                </div>
+                <div className='cui flex row ai-end'>
+                    <Button.Group>
+                        <Button icon='caret square left outline' onClick={actions.prevSlice} title='Previous slice' />
+                        <Button icon='caret square right outline' onClick={actions.nextSlice} title='Next slice' />
+                        <Label style={styles.sliceLabel} color='grey' className='cui pt-12 text-align-left'>{`SLICE: ${sliceNum ?? ''}`}</Label>
+                    </Button.Group>
+                    <Button.Group>
+                        <Button onClick={actions.submitSelection} title='Submit selection'>
+                            Submit
+                        </Button>
+                    </Button.Group>
                 </div>
             </div>
-        );
-    }
+        </div>
+    );
 }

@@ -3,7 +3,7 @@ import { Transformer, Ellipse } from 'react-konva';
 
 export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSelect, callbackAttributes }) {
     const [isDragging, setDraggingFlag] = useState(false);
-    const [rectangle, setEllipse] = useState(shapeProps);
+    const [ellipse, setEllipse] = useState(shapeProps);
     const shapeRef = React.useRef();
     const trRef = React.useRef();
 
@@ -27,7 +27,7 @@ export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSele
         onDragEnd: (e) => {
             setDraggingFlag(false);
             onAttributesChange({
-                ...rectangle,
+                ...ellipse,
                 x: e.target.x(),
                 y: e.target.y(),
             });
@@ -45,7 +45,8 @@ export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSele
             node.scaleX(1);
             node.scaleY(1);
             onAttributesChange({
-                ...rectangle,
+                ...ellipse,
+                rotation: node.attrs.rotation,
                 x: node.x(),
                 y: node.y(),
                 // set minimal value
@@ -61,7 +62,7 @@ export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSele
                 onClick={onSelect}
                 onTap={onSelect}
                 ref={shapeRef}
-                {...rectangle}
+                {...ellipse}
                 opacity={isDragging ? dynamicProps.opacity.drag : dynamicProps.opacity.still}
                 fill={isDragging ? dynamicProps.fill.drag : dynamicProps.fill.still}
                 draggable

@@ -25,7 +25,8 @@ export default class URLImage extends Component {
             console.log(args);
         });
     }
-    handleLoad = () => {
+    handleLoad = (e) => {
+        this.props.actions.onLoad(e);
         this.setState({
             image: this.image,
         });
