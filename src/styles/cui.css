@@ -1,3 +1,18 @@
+html {
+    --header-height-default: 80px;
+    --footer-height-default: 80px;
+    --header-height-xs: var(--header-height-default) * 0.6;
+    --header-height-sm: var(--header-height-default) * 0.7;
+    --header-height-md: var(--header-height-default) * 0.8;
+    --header-height-lg: var(--header-height-default) * 0.9;
+    --header-height-xl: var(--header-height-default) * 1;
+    --footer-height-xs: var(--footer-height-default) * 0.6;
+    --footer-height-sm: var(--footer-height-default) * 0.7;
+    --footer-height-md: var(--footer-height-default) * 0.8;
+    --footer-height-lg: var(--footer-height-default) * 0.9;
+    --footer-height-xl: var(--footer-height-default) * 1;
+}
+
 @import '01-xs.css';
 @import '02-sm.css';
 @import '03-md.css';
