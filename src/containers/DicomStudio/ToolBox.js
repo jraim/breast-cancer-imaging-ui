@@ -14,28 +14,30 @@ const styles = {
         height: '50px',
         cursor: 'pointer',
     },
-    dropdown: {
-        width: '20px',
+    dropdownCase: {
+        width: '30%',
+    },
+    dropdownMriPass: {
+        width: '70%',
     },
     sliceLabel: {
-        width: '70px',
+        width: '130px',
     },
 };
 
-export default function ToolBox({ actions, caseCodeList, sliceNum }) {
-    const CasesDropdown = () => {
-        const options = caseCodeList.map((c, i) => ({ key: i, text: c.split('/')[0], value: c }));
-        return (
-            <Dropdown title='Select a case' placeholder='Select a case code' search selection options={options} onChange={actions.onDropDownChange} />
-        );
-    };
+const CustomDropdown = ({ list, placeholder, onChange }) => {
+    const options = list.map((c, i) => ({ key: i, text: c.split('/')[0], value: c }));
+    return <Dropdown title={placeholder} placeholder={placeholder} fluid selection options={options} onChange={onChange} />;
+};
 
+export default function ToolBox({ actions, caseCodeList, mriPassList, sliceNum }) {
     return (
         <div className='cui flex row jc-space-between' style={styles.toolBox}>
             <div className='cui flex row jc-space-between width-100'>
-                <div className='cui flex row ac-start'>
-                    <CasesDropdown />
-                </div>
+                <CustomDropdown list={caseCodeList} placeholder='Select a case code' onChange={actions.onCaseCodeDropDownChange} />
+
+                <CustomDropdown list={mriPassList} placeholder='Select a MRI pass' onChange={actions.onMriPassNumDropDownChange} />
+
                 <div className='cui flex row ai-end'>
                     <Button.Group>
                         <Button icon='caret square left outline' onClick={actions.prevSlice} title='Previous slice' />

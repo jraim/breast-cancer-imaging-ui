@@ -25,17 +25,20 @@ const initEllipse = {
 // Component config
 const ellipseDynamicProps = {
     fill: { still: 'red', drag: 'white' },
-    opacity: { still: 0.5, drag: 0.2 },
+    opacity: { still: 0.4, drag: 0.2 },
 };
 
 export default function DicomStudio() {
-    const [caseCodeList, setCaseCodeList] = useState(['a1', 'a2', 'a3']);
+    const [caseCodeList, setCaseCodeList] = useState(null);
+    const [mriPassList, setMriPassList] = useState(null);
     const [caseCode, setCaseCode] = useState(null);
+    const [mriPass, setMriPass] = useState(null);
+    const [numberOfSlices, setNumberOfSlices] = useState(null);
     const [sliceNum, setSliceNum] = useState(null);
     const [slice, setSlice] = useState([]);
     const [selectedId, selectShape] = useState(null);
     const [ellipse, setEllipse] = useState(initEllipse);
-    const [stageSize, setStageSize] = useState({ width: 600, height: 400 });
+    const [stageSize, setStageSize] = useState({ width: 480, height: 480 });
     const [hasImageLoaded, setHasImageLoaded] = useState(false);
 
     const imageRef = useRef(null);
@@ -43,23 +46,9 @@ export default function DicomStudio() {
     // Load component data
     useEffect(() => {
         datasetApi.getCaseCodes().then((caseCodeListResponse) => {
-            setCaseCodeList(caseCodeListResponse);
+            setCaseCodeList(caseCodeListResponse.data.data);
         });
-    }, []);
-
-    const styles = {
-        stage: {
-            margin: '20px 0 0 0',
-            width: `${stageSize.width}px`,
-            height: '70vh',
-        },
-        imageBox: {
-            objectFit: 'fill',
-            backgroundColor: 'white',
-            width: `${stageSize.width}px`,
-            height: `${stageSize.height}px`,
-        },
-    };
+    }, [slice]);
 
     /**
      * Function to determine wether a shape has been dragged out of stage
@@ -71,13 +60,15 @@ export default function DicomStudio() {
     };
 
     const renderSlice = (num) => {
-        datasetApi.getSlice(num).then((sliceResponse) => {
-            setHasImageLoaded(false);
-            setStageSize(sliceResponse.shape);
-            setSlice(sliceResponse);
-            setSliceNum(num);
-            setHasImageLoaded(true);
-        });
+        setHasImageLoaded(false);
+        datasetApi
+            .getSlice(num)
+            .then((sliceResponse) => sliceResponse.data)
+            .then((data) => {
+                // setStageSize(data.shape);
+                setSlice(data);
+                setSliceNum(num);
+            });
     };
 
     const toolBoxActions = {
@@ -89,25 +80,29 @@ export default function DicomStudio() {
         },
         prevSlice: () => {
             if (sliceNum <= 1) return;
-            setSlice(null);
             renderSlice(sliceNum - 1);
         },
         nextSlice: () => {
-            if (sliceNum >= 10 /* TODO Obter o num de slices do backend */) return;
-            setSlice(null);
+            if (sliceNum >= numberOfSlices) return;
             renderSlice(sliceNum + 1);
         },
         submitSelection: () => {
             const { x, y, width, height, rotation } = ellipse;
-            console.log({ x, y, width, height, rotation });
-            datasetApi.sendEllipseData(ellipse).then((result) => {
+
+            datasetApi.sendEllipseData(sliceNum, ellipse).then((result) => {
                 console.log(result);
             });
         },
-        onDropDownChange: (e, data) => {
-            setSlice(null);
+        onCaseCodeDropDownChange: (e, data) => {
             setCaseCode(data.value);
-            datasetApi.init(caseCode).then((result) => renderSlice(1));
+            setMriPassList(caseCodeList[data.value]);
+        },
+        onMriPassNumDropDownChange: async (e, data) => {
+            setSlice(null);
+            setMriPass(data.value);
+            const numSlices = mriPassList[data.value].numslices;
+            setNumberOfSlices(numSlices);
+            datasetApi.init(mriPassList[data.value].code).then((result) => renderSlice(parseInt(numSlices / 2)));
         },
     };
 
@@ -128,37 +123,69 @@ export default function DicomStudio() {
 
     const urlImageActions = {
         onLoad: (e) => {
+            const { width, height } = imageRef.current.image;
+            setStageSize({ width, height });
             setHasImageLoaded(true);
         },
     };
 
+    const styles = {
+        stage: {
+            margin: '20px 0 0 0',
+            minWidth: `${stageSize.width}px`,
+            height: '70vh',
+        },
+        imageBox: {
+            objectFit: 'fill',
+            backgroundColor: 'white',
+            width: `${stageSize.width + 300}px`,
+            height: `${stageSize.height}px`,
+        },
+        loader: {
+            // minWidth: `${stageSize.width}px`,
+            // height: '70vh',
+        },
+    };
+
     return (
-        <div className='cui flex column ai-center'>
-            <div className='cui flex column ai-center jc-center' style={styles.stage}>
-                <ToolBox actions={toolBoxActions} caseCodeList={caseCodeList} sliceNum={sliceNum} />
-                <div className='cui flex row ai-center jc-center' style={styles.imageBox}>
-                    {!caseCode ? (
+        <div className='cui flex column ai-center jc-space-around mt-12'>
+            <div className='cui flex column jc-center'>
+                <ToolBox
+                    actions={toolBoxActions}
+                    caseCodeList={Object.keys(caseCodeList ?? {})}
+                    mriPassList={Object.keys(mriPassList ?? {})}
+                    sliceNum={sliceNum}
+                />
+                <div className='cui flex row ai-center jc-space-between' style={styles.imageBox}>
+                    {!mriPass ? (
                         <Instructions />
-                    ) : !hasImageLoaded || !sliceNum || !slice || slice.length < 1 ? (
-                        <Loader />
+                    ) : !sliceNum || !slice || slice.length < 1 ? (
+                        <div className='cui flex column jc-center ai-center width-100'>
+                            <Loader />
+                        </div>
                     ) : (
-                        <Stage
-                            width={stageSize.width}
-                            height={stageSize.height}
-                            onMouseDown={ellipseActions.checkDeselect}
-                            onTouchStart={ellipseActions.checkDeselect}
-                        >
-                            <Layer>
-                                <URLImage actions={urlImageActions} ref={imageRef} src={slice['image_path']} />
-                                <MyEllipse
-                                    shapeProps={initEllipse}
-                                    dynamicProps={ellipseDynamicProps}
-                                    isSelected={initEllipse.id === selectedId}
-                                    onSelect={ellipseActions.onSelect}
-                                    callbackAttributes={ellipseActions.onChange}
-                                />
-                            </Layer>
-                        </Stage>
+                        <div className='cui flex row ac-start'>
+                            <Stage
+                                width={stageSize.width}
+                                height={stageSize.height}
+                                onMouseDown={ellipseActions.checkDeselect}
+                                onTouchStart={ellipseActions.checkDeselect}
+                            >
+                                <Layer>
+                                    <URLImage actions={urlImageActions} ref={imageRef} src={datasetApi.baseURL + slice['image_path']} />
+                                    <MyEllipse
+                                        shapeProps={initEllipse}
+                                        dynamicProps={ellipseDynamicProps}
+                                        isSelected={initEllipse.id === selectedId}
+                                        onSelect={ellipseActions.onSelect}
+                                        callbackAttributes={ellipseActions.onChange}
+                                    />
+                                </Layer>
+                            </Stage>
+                            <div>
+                                <h1 className='cui mt-12 ml-12'>Clinical Data</h1>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
