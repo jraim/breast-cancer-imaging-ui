@@ -1,12 +1,25 @@
 .App {
     text-align: center;
-    background-color: #CDCBCC;
+    background-color: #c9eedb;
     min-height: 100vh;
     margin: 0;
     padding: 0;
-    color: #F1F2EB;
+    color: black;
 }
 
-#app-container {
-    min-height: calc(100vh - var(--header-height) - var(--header-height));
-}
+/* 
+body {
+    flex-direction: column;
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    font-family: 'Trebuchet MS', 'Lucida Sans Unicode', 'Lucida Grande', 'Lucida Sans', Arial, sans-serif;
+} */
+
+/* #root {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    margin-left: auto;
+    margin-right: auto;
+} */

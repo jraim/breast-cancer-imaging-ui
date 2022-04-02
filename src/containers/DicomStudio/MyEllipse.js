@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Transformer, Ellipse } from 'react-konva';
 
-export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSelect, callbackAttributes, disabled }) {
+export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSelect, callbackAttributes }) {
     const [isDragging, setDraggingFlag] = useState(false);
     const [ellipse, setEllipse] = useState(shapeProps);
     const shapeRef = React.useRef();
@@ -59,13 +59,13 @@ export default function MyEllipse({ shapeProps, dynamicProps, isSelected, onSele
     return (
         <React.Fragment>
             <Ellipse
-                onClick={!disabled ? onSelect : () => {}}
-                onTap={!disabled ? onSelect : () => {}}
+                onClick={onSelect}
+                onTap={onSelect}
                 ref={shapeRef}
                 {...ellipse}
                 opacity={isDragging ? dynamicProps.opacity.drag : dynamicProps.opacity.still}
                 fill={isDragging ? dynamicProps.fill.drag : dynamicProps.fill.still}
-                {...{ draggable: !disabled }}
+                draggable
                 stroke={'black'}
                 onDragStart={eventHandlers.onDragStart}
                 onDragEnd={eventHandlers.onDragEnd}

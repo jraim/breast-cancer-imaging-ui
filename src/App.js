@@ -10,12 +10,11 @@ function App() {
         <div className='App cui flex column jc-space-between'>
             <div>
                 <AppHeader />
-                <div id='#app-container'>
-                    <DicomStudio id='app-container' />
-                </div>
+                <DicomStudio />
             </div>
-
-            <AppFooter />
+            <div>
+                <AppFooter />
+            </div>
         </div>
     );
 }

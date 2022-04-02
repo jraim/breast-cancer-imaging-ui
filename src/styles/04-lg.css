@@ -1,14 +1,7 @@
-
-@media only screen and (min-width: 900px) {
-    html {
-        --header-height: var(--header-height-lg);
-        --footer-height: var(--footer-height-lg);
-    }
+/* Large devices (laptops/desktops, 992px and up) */
+@media only screen and (min-width: 992px) {
     .header-height {
-        min-height: calc(var(--header-height));
-    }
-    .footer-height {
-        min-height: calc(var(--footer-height));
+        height: 90px;
     }
     #root {
         max-width: 100vw;

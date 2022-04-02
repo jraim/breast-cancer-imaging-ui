@@ -1,33 +1,11 @@
-
-@media only screen and (max-width: 480px) {
-    html {
-        --header-height: var(--header-height-xs);
-        --footer-height: var(--footer-height-xs);
-    }
-
+/* Extra small devices (phones, 600px and down) */
+@media only screen and (max-width: 600px) {
     .header-height {
-        min-height: calc(var(--header-height));
-    }
-    .footer-height {
-        min-height: calc(var(--footer-height));
+        height: 59px;
     }
 
     #root {
-        /* max-width: 100vw; */
-        transform: rotate(90deg);
-        transform-origin:bottom left;
-        
-        position:absolute;
-        top: -100vw;
-        left: 0;
-        
-        height:100vw;
-        width:100vh;
-        
-        background-color:#000;
-        color:#fff;
-    
-        overflow:auto;
+        max-width: 100vw;
     }
 
     h1 {

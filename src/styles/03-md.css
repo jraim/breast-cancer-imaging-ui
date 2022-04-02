@@ -1,13 +1,7 @@
-@media only screen and (min-width: 770px) {
-    html {
-        --header-height: var(--header-height-md);
-        --footer-height: var(--footer-height-md);
-    }
+/* Medium devices (landscape tablets, 768px and up) */
+@media only screen and (min-width: 768px) {
     .header-height {
-        min-height: calc(var(--header-height));
-    }
-    .footer-height {
-        min-height: calc(var(--footer-height));
+        height: 80px;
     }
 
     #root {
