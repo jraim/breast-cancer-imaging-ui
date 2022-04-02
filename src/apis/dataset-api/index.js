@@ -1,54 +1,15 @@
-// import axios from 'axios';
+import axios from 'axios';
 
-// export default axios.create({
-//     baseURL: 'https://picsum.photos/',
-// });
+const baseURL = process.env.NODE_ENV === 'production' ? '/' : 'http://localhost:5000/';
+
+const api = axios.create({ baseURL });
 
 const datasetApi = {
-    get: async () => {
-        return [
-            {
-                id: 1,
-                url: 'https://picsum.photos/600/400',
-            },
-            {
-                id: 2,
-                url: 'https://picsum.photos/600/401',
-            },
-            {
-                id: 3,
-                url: 'https://picsum.photos/600/402',
-            },
-            {
-                id: 4,
-                url: 'https://picsum.photos/601/400',
-            },
-            {
-                id: 5,
-                url: 'https://picsum.photos/601/401',
-            },
-            {
-                id: 6,
-                url: 'https://picsum.photos/601/402',
-            },
-            {
-                id: 7,
-                url: 'https://picsum.photos/602/400',
-            },
-            {
-                id: 8,
-                url: 'https://picsum.photos/602/401',
-            },
-            {
-                id: 9,
-                url: 'https://picsum.photos/602/402',
-            },
-            {
-                id: 10,
-                url: 'https://picsum.photos/603/400',
-            },
-        ];
-    },
+    init: (caseCode) => api.post('api/mri/init', { case: caseCode }),
+    getCaseCodes: () => api.get('api/mri/list'),
+    getSlice: (sliceNum) => api.get(`api/mri/slice/${sliceNum}`),
+    sendEllipseData: (sliceNum, data) => api.post(`api/mri/snake/${sliceNum}`, data),
+    baseURL,
 };
 
 export default datasetApi;

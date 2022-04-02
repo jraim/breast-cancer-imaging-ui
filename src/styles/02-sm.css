@@ -1,7 +1,14 @@
-/* Small devices (portrait tablets and large phones, 600px and up) */
-@media only screen and (min-width: 600px) {
+
+@media only screen and (min-width: 480px) {
+    html {
+        --header-height: var(--header-height-sm);
+        --footer-height: var(--footer-height-sm);
+    }
     .header-height {
-        height: 80px;
+        min-height: calc(var(--header-height));
+    }
+    .footer-height {
+        min-height: calc(var(--footer-height));
     }
 
     #root {

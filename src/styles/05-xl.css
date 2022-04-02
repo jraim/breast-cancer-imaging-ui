@@ -1,8 +1,16 @@
-/* Extra large devices (large laptops and desktops, 1200px and up) */
+
 @media only screen and (min-width: 1200px) {
-    .header-height {
-        height: 120px;
+    html {
+        --header-height: var(--header-height-xl);
+        --footer-height: var(--footer-height-xl);
     }
+    .header-height {
+        min-height: calc(var(--header-height));
+    }
+    .footer-height {
+        min-height: calc(var(--footer-height));
+    }
+
     #root {
         /* max-width: 1200px; */
         max-width: 100vw;
